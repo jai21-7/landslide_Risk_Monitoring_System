@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Operations · NER Landslide Watch{% endblock %}
+{% block body %}
+<p class="kicker">Clauses c · f · multilingual alerts</p>
+<h1>Risk, roads, weather forecast, response order</h1>
+<p class="lead">District / SDMA view. Dispatch simulated SMS + in-app warnings in four languages.</p>
+
+<form class="inline" id="dispatch">
+  <label>Alert language
+    <select name="lang" id="lang">
+      <option value="en">English</option>
+      <option value="hi">हिन्दी</option>
+      <option value="as">অসমীয়া</option>
+      <option value="bn">বাংলা</option>
+    </select>
+  </label>
+  <button type="submit">Dispatch early warnings</button>
+  <span id="dispatch-result"></span>
+</form>
+
+<section class="cards">
+  <article><h3>Severe</h3><p>{{ state.counts.severe }}</p></article>
+  <article><h3>High</h3><p>{{ state.counts.high }}</p></article>
+  <article><h3>Roads closed / blocked</h3><p>{{ state.counts.blocked_roads }}</p></article>
+  <article><h3>Field reports</h3><p>{{ state.counts.reports }}</p></article>
+</section>
+
+<h2>Emergency response prioritisation</h2>
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>#</th><th>Site</th><th>People near slope</th><th>Roads hit</th><th>Reports</th><th>Score</th><th>Action</th></tr>
+    </thead>
+    <tbody>
+      {% for row in state.priority %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td><span class="pill" style="background:{{ row.color }}">{{ row.level }}</span> {{ row.station_name }}</td>
+        <td>{{ row.people_exposed }}</td>
+        <td>{{ row.roads_affected }}</td>
+        <td>{{ row.field_reports }}</td>
+        <td>{{ row.priority_score }}</td>
+        <td>{{ row.action }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<h2>Road connectivity</h2>
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Road</th><th>Kind</th><th>Linked sensor</th><th>Status</th></tr></thead>
+    <tbody>
+      {% for r in state.assets.roads %}
+      <tr>
+        <td>{{ r.name }}</td>
+        <td>{{ r.kind }}</td>
+        <td>{{ r.station_name }}</td>
+        <td><span class="pill" style="background:{{ r.color }}">{{ r.status }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<h2>Weather-linked 72-hour forecast</h2>
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Site</th><th>+24 h</th><th>+48 h</th><th>+72 h</th></tr></thead>
+    <tbody>
+      {% for s in state.stations %}
+      <tr>
+        <td>{{ s.station_name }}</td>
+        {% for h in [24, 48, 72] %}
+          {% set cell = state.forecast | selectattr("station_id", "equalto", s.station_id) | selectattr("horizon_h", "equalto", h) | list | first %}
+          <td>{% if cell %}<span class="pill" style="background:{{ cell.color }}">{{ cell.level }}</span> {{ (cell.probability * 100)|round|int }}%{% endif %}</td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<h2>Alert log (SMS + app)</h2>
+<ul class="log">
+  {% for n in state.notifications %}
+  <li><code>{{ n.created_at[0:16] }}</code> · {{ n.audience }} / {{ n.channel }} / {{ n.lang }} — {{ n.body }}</li>
+  {% else %}
+  <li>No alerts dispatched yet. Use the button above when High or Severe sites exist.</li>
+  {% endfor %}
+</ul>
+{% endblock %}
+{% block scripts %}
+<script>
+  document.getElementById("dispatch").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const lang = document.getElementById("lang").value;
+    const res = await fetch("/api/dispatch", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lang })
+    });
+    const data = await res.json();
+    document.getElementById("dispatch-result").textContent =
+      `Logged ${data.sent} messages. ${data.preview.length} High/Severe sites.`;
+    if (data.sent) location.reload();
+  });
+</script>
+{% endblock %}
