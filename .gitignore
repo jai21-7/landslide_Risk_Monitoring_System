@@ -10,4 +10,7 @@ htmlcov/
 *.pkl
 !models/.gitkeep
 data/generated/
+data/platform.db
+data/uploads/*
+!data/uploads/.gitkeep
 .DS_Store
