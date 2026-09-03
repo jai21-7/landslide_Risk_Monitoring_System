@@ -77,7 +77,20 @@ pre { background: #1c1915; color: #f3efe6; padding: 0.7rem 0.9rem; overflow-x: a
 .bar { background: #e6dfd2; height: 0.7rem; }
 .bar i { display: block; height: 100%; background: var(--moss); }
 footer { padding: 1rem 1.5rem 2rem; color: #6a6358; font-size: 0.85rem; }
+.map-lg { height: 520px; border: 1px solid var(--rule); margin-bottom: 1rem; }
+.layer-bar { display: flex; flex-wrap: wrap; gap: 0.7rem 1rem; margin: 0 0 0.6rem; font-size: 0.88rem; }
+.feeds { max-height: 260px; font-size: 0.78rem; }
+.cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.7rem; margin: 1rem 0; }
+.cards article { background: var(--card); border: 1px solid var(--rule); padding: 0.8rem; }
+.cards h3 { margin: 0; font-size: 0.8rem; color: #6a6358; font-family: inherit; }
+.cards p { margin: 0.2rem 0 0; font-size: 1.6rem; font-family: Fraunces, serif; }
+.inline { display: flex; gap: 0.8rem; align-items: end; flex-wrap: wrap; margin: 1rem 0; }
+.inline label { font-size: 0.9rem; }
+.log { padding-left: 1.1rem; }
+.net { padding: 0.4rem 0.6rem; border: 1px solid var(--rule); background: var(--card); }
+.net.off { border-color: var(--clay); }
+input[type="text"], input[name="lat"], input[name="lon"], textarea, input[type="file"] { width: 100%; font: inherit; }
 @media (max-width: 860px) {
-  .hero, .grid-2, .bar-row { grid-template-columns: 1fr; }
+  .hero, .grid-2, .bar-row, .cards { grid-template-columns: 1fr; }
   .top { flex-direction: column; align-items: flex-start; }
 }

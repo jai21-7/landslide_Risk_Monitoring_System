@@ -1,31 +1,41 @@
 {% extends "base.html" %}
-{% block title %}Live map · NER Landslide Watch{% endblock %}
+{% block title %}GIS command map · NER Landslide Watch{% endblock %}
 {% block body %}
 <section class="hero">
   <div>
-    <p class="kicker">Today's picture</p>
-    <h1>Which hill roads need a warning?</h1>
+    <p class="kicker">Clause d · real-time GIS</p>
+    <h1>Risk heatmap, roads, villages, infrastructure</h1>
     <p class="lead">
-      Each pin is a monitoring site in NER. Colour is the AI risk level:
-      green is calm, red means issue an early warning.
+      Pins are AI-scored slopes. The heat layer is predicted landslide probability.
+      Toggle satellite, roads, and field reports. Red roads are likely cut.
     </p>
   </div>
   <dl class="stats">
     <div><dt>Highest site</dt><dd>{{ worst.station_name }}</dd></div>
     <div><dt>Level</dt><dd style="color:{{ worst.color }}">{{ worst.level }}</dd></div>
-    <div><dt>Model risk</dt><dd>{{ (worst.probability * 100)|round|int }}%</dd></div>
-    <div><dt>Severe / High</dt><dd>{{ counts.get('Severe', 0) + counts.get('High', 0) }}</dd></div>
+    <div><dt>Blocked / closed roads</dt><dd>{{ state.counts.blocked_roads }}</dd></div>
+    <div><dt>Field reports</dt><dd>{{ state.counts.reports }}</dd></div>
   </dl>
 </section>
 
+<div class="layer-bar" id="layers">
+  <label><input type="checkbox" data-layer="heat" checked /> Heatmap</label>
+  <label><input type="checkbox" data-layer="stations" checked /> Sensors</label>
+  <label><input type="checkbox" data-layer="roads" checked /> Roads</label>
+  <label><input type="checkbox" data-layer="villages" checked /> Villages</label>
+  <label><input type="checkbox" data-layer="infra" checked /> Infrastructure</label>
+  <label><input type="checkbox" data-layer="reports" checked /> Citizen reports</label>
+  <label><input type="checkbox" id="sat" /> Satellite basemap</label>
+</div>
+<div id="map" class="map-lg" aria-label="NER GIS risk map"></div>
+
 <div class="grid-2">
-  <div id="map" aria-label="NER landslide risk map"></div>
   <aside class="panel">
-    <h2>Try a what-if</h2>
-    <p>Move the sliders. This is the same model the map uses — you are pretending to be the weather.</p>
+    <h2>What-if rainfall</h2>
+    <p>Same predictive engine as the heatmap. Pretend a cloudburst and watch the colour change.</p>
     <label>Station
       <select id="station">
-        {% for s in stations %}
+        {% for s in state.stations %}
         <option value="{{ s.station_id }}">{{ s.station_name }} ({{ s.state }})</option>
         {% endfor %}
       </select>
@@ -45,55 +55,18 @@
     <button id="run" type="button">Ask the model</button>
     <div id="whatif" class="alert-box" hidden></div>
   </aside>
+  <aside class="panel">
+    <h2>Live feeds on the selected site</h2>
+    <p>Clause a: rainfall, soil, satellite NDVI proxy, DEM slope, GSI history.</p>
+    <pre id="feeds" class="feeds">Pick a sensor pin on the map.</pre>
+  </aside>
 </div>
-
-<section class="table-wrap">
-  <h2>All stations</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Site</th><th>State</th><th>Rain 24h</th><th>Rain 72h</th>
-        <th>Slope</th><th>Risk</th><th>Warning</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for s in stations %}
-      <tr>
-        <td>{{ s.station_name }}</td>
-        <td>{{ s.state }}</td>
-        <td>{{ s.rainfall_24h_mm }} mm</td>
-        <td>{{ s.rainfall_72h_mm }} mm</td>
-        <td>{{ s.slope_deg }}°</td>
-        <td>{{ (s.probability * 100)|round|int }}%</td>
-        <td><span class="pill" style="background:{{ s.color }}">{{ s.level }}</span></td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</section>
 {% endblock %}
 {% block scripts %}
+<script src="{{ url_for('static', filename='map.js') }}"></script>
 <script>
-  const stations = {{ stations | tojson }};
-  const map = L.map("map").setView([26.2, 92.4], 6);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: "&copy; OpenStreetMap"
-  }).addTo(map);
-  stations.forEach((s) => {
-    const marker = L.circleMarker([s.lat, s.lon], {
-      radius: 10,
-      color: "#1a1814",
-      weight: 1,
-      fillColor: s.color,
-      fillOpacity: 0.92
-    }).addTo(map);
-    marker.bindPopup(
-      `<strong>${s.station_name}</strong><br>${s.state}<br>` +
-      `Warning: <b>${s.level}</b> (${Math.round(s.probability * 100)}%)<br>` +
-      `${s.advice}`
-    );
-  });
-
+  const STATE = {{ state | tojson }};
+  window.NER_MAP = bootMap("map", STATE);
   const $ = (id) => document.getElementById(id);
   ["rain24", "rain72", "slope"].forEach((id) => {
     $(id).addEventListener("input", () => $(id + "v").textContent = $(id).value);
@@ -105,12 +78,11 @@
       rainfall_72h_mm: Number($("rain72").value),
       slope_deg: Number($("slope").value)
     };
-    const res = await fetch("/api/what-if", {
+    const data = await (await fetch("/api/what-if", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body)
-    });
-    const data = await res.json();
+    })).json();
     const box = $("whatif");
     box.hidden = false;
     box.style.borderColor = data.color;

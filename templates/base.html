@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% block title %}NER Landslide Watch{% endblock %}</title>
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <meta name="theme-color" content="#8b3a1d" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -16,20 +18,29 @@
       <span class="mark">SIH26001</span>
       <span>
         <strong>NER Landslide Watch</strong>
-        <small>AI early warning for the North Eastern Region</small>
+        <small>Real-time GIS · AI early warning · MDoNER</small>
       </span>
     </a>
     <nav>
-      <a href="/" class="{{ 'on' if request.path == '/' else '' }}">Live map</a>
-      <a href="/how-it-works" class="{{ 'on' if request.path == '/how-it-works' else '' }}">How the AI works</a>
-      <a href="/learn" class="{{ 'on' if request.path == '/learn' else '' }}">Learn step by step</a>
+      <a href="/" class="{{ 'on' if request.path == '/' else '' }}">GIS map</a>
+      <a href="/ops" class="{{ 'on' if request.path == '/ops' else '' }}">Operations</a>
+      <a href="/report" class="{{ 'on' if request.path == '/report' else '' }}">Field report</a>
+      <a href="/how-it-works" class="{{ 'on' if request.path == '/how-it-works' else '' }}">AI engine</a>
+      <a href="/learn" class="{{ 'on' if request.path == '/learn' else '' }}">Learn</a>
     </nav>
   </header>
   <main>{% block body %}{% endblock %}</main>
   <footer>
-    Ministry of Development of North Eastern Region · Disaster Management · Software demo for beginners
+    Demo platform for SIH26001 — IMD / NRSC / GSI adapters are simulated until official keys are plugged in.
+    Works as a phone web-app (PWA) with offline report queue.
   </footer>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js");
+    }
+  </script>
   {% block scripts %}{% endblock %}
 </body>
 </html>
