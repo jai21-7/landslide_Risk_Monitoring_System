@@ -1,0 +1,9 @@
+{
+  "name": "NER Landslide Watch",
+  "short_name": "NER Watch",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f3efe6",
+  "theme_color": "#8b3a1d",
+  "description": "SIH26001 AI landslide early warning for North East India"
+}
