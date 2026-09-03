@@ -12,4 +12,4 @@ def test_learn_page_renders():
     client = app.test_client()
     res = client.get("/learn")
     assert res.status_code == 200
-    assert b"five small steps" in res.data
+    assert b"SIH26001" in res.data
