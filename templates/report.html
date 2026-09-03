@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Field report · NER Landslide Watch{% endblock %}
+{% block body %}
+<p class="kicker">Clause e · geo-tagged citizen / official reports</p>
+<h1>Upload a crack, slope move, or blocked road</h1>
+<p class="lead">
+  Works on a phone. If the network drops, the form waits in this device and syncs later
+  (photos sync when you are online).
+</p>
+<p id="net" class="net">Checking link…</p>
+<form id="report-form" class="panel">
+  <label>Who are you
+    <select name="reporter_role">
+      <option value="citizen">Citizen</option>
+      <option value="field_official">Field official</option>
+      <option value="pwd">PWD / BRO road crew</option>
+    </select>
+  </label>
+  <label>What do you see
+    <select name="category">
+      <option value="crack">Crack in slope / retaining wall</option>
+      <option value="slope_movement">Slope movement</option>
+      <option value="blocked_road">Blocked road</option>
+      <option value="other">Other</option>
+    </select>
+  </label>
+  <label>Latitude <input name="lat" id="lat" required /></label>
+  <label>Longitude <input name="lon" id="lon" required /></label>
+  <button type="button" id="geo">Use my GPS</button>
+  <label>Note <textarea name="note" rows="3" placeholder="NH stretch, village name, time…"></textarea></label>
+  <label>Photo or short video <input type="file" name="media" accept="image/*,video/*" /></label>
+  <button type="submit">Send report</button>
+</form>
+<p id="form-status"></p>
+<h2>Recent reports</h2>
+<ul id="report-list" class="log"></ul>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='report.js') }}"></script>
+{% endblock %}
