@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}How the AI works · NER Landslide Watch{% endblock %}
+{% block body %}
+<article class="prose">
+  <p class="kicker">Inside the model</p>
+  <h1>What the computer actually learned</h1>
+  <p>
+    We trained a Random Forest on {{ metrics.n_rows }} simulated days.
+    About {{ (metrics.positive_rate * 100)|round(1) }}% of days had a landslide
+    in the training story — rare events, like real life.
+  </p>
+  <ul class="metric-row">
+    <li><strong>{{ (metrics.accuracy * 100)|round(1) }}%</strong> accuracy on held-out days</li>
+    <li><strong>{{ metrics.roc_auc|round(3) }}</strong> ROC-AUC (1.0 is a perfect ranker)</li>
+  </ul>
+  <h2>Which clues mattered most?</h2>
+  <p>Taller bars = the forest used that sensor more often when voting.</p>
+  <div class="bars">
+    {% for name, score in importance %}
+    <div class="bar-row">
+      <span>{{ name }}</span>
+      <div class="bar"><i style="width: {{ (score * 100)|round }}%"></i></div>
+      <em>{{ (score * 100)|round(1) }}%</em>
+    </div>
+    {% endfor %}
+  </div>
+  <h2>The seven input numbers</h2>
+  <ol>
+    {% for f in features %}<li><code>{{ f }}</code></li>{% endfor %}
+  </ol>
+  <p>
+    This is a teaching model, not an official forecast. A production SIH prototype
+    would next plug in real IMD rain gauges, DEM slope, and GSI event logs.
+  </p>
+</article>
+{% endblock %}
