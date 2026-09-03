@@ -2,66 +2,39 @@
 {% block title %}Learn · NER Landslide Watch{% endblock %}
 {% block body %}
 <article class="prose">
-  <p class="kicker">Beginner path</p>
-  <h1>Build this project in five small steps</h1>
-  <p>
-    You do not need prior AI experience. Each step is one idea, one Python file,
-    and one thing you can point to on the live map.
-  </p>
-
+  <p class="kicker">SIH26001 mapped to this repo</p>
+  <h1>From the official problem to running code</h1>
+  <p>The North Eastern Region faces landslides and road isolation after heavy rain. This demo is a full software walk-through of every clause, with simulated IMD / satellite / SMS pieces you can later swap for live keys.</p>
   <ol class="steps">
     <li>
-      <h2>1. Understand the problem (config.py)</h2>
-      <p>
-        NER has steep hills and a strong monsoon. Landslides block roads and
-        villages. We placed 12 imaginary but realistic monitoring sites across
-        the eight states. Open <code>ner_landslide/config.py</code> and read the
-        station list. Change a slope number, restart the app, and that site
-        becomes more (or less) dangerous.
-      </p>
+      <h2>a. Collect rainfall, soil, satellite, terrain, history</h2>
+      <p><code>ner_landslide/feeds.py</code> + <code>data.py</code>. Open a pin on the GIS map — the feed box shows each source.</p>
     </li>
     <li>
-      <h2>2. Get data (data.py)</h2>
-      <p>
-        Real systems use IMD rainfall, GSI landslide records, and satellite
-        slope maps. Here we <em>simulate</em> those sensors so you can learn
-        without API keys. Run:
-      </p>
-      <pre>python scripts/01_make_data.py</pre>
-      <p>You will get a CSV: one row per site per day, with rain, slope, soil moisture, and whether a landslide happened.</p>
+      <h2>b. AI/ML high-risk zones</h2>
+      <p><code>ner_landslide/model.py</code> Random Forest. Page: <a href="/how-it-works">AI engine</a>.</p>
     </li>
     <li>
-      <h2>3. Train a tiny AI model (model.py)</h2>
-      <p>
-        A Random Forest is a crowd of simple yes/no trees that vote.
-        We show it past days and the yes/no landslide column. Then it guesses
-        the chance for a new day. Run:
-      </p>
-      <pre>python scripts/02_train_model.py</pre>
-      <p>Look at accuracy and “feature importance” — which clues the forest trusted most (usually 72-hour rain).</p>
+      <h2>c. Real-time alerts to district, SDMA, community</h2>
+      <p><code>notify.py</code> + Operations → Dispatch. SMS is logged (plug Twilio later).</p>
     </li>
     <li>
-      <h2>4. Turn a % into a warning (alerts.py)</h2>
-      <p>
-        0.81 is not useful to a district officer. Colours are:
-        Low, Moderate, High, Severe. There is also a safety net: if rain is
-        extreme, we raise the warning even if the model is unsure.
-      </p>
+      <h2>d. GIS of roads, villages, infrastructure</h2>
+      <p><code>gis.py</code> + home map layers and heatmap.</p>
     </li>
     <li>
-      <h2>5. Show it on a map (app.py)</h2>
-      <p>Flask serves web pages. The live map reads JSON from <code>/api/stations</code>. The what-if sliders call <code>/api/what-if</code>.</p>
-      <pre>python app.py</pre>
-      <p>Open <code>http://127.0.0.1:5000</code>. Click pins. Drag sliders. Read the How the AI works page.</p>
+      <h2>e. Geo-tagged photo/video reports</h2>
+      <p><a href="/report">Field report</a> page. <code>store.py</code> saves files under <code>data/uploads</code>.</p>
+    </li>
+    <li>
+      <h2>f. Dashboards: severity, roads, weather forecast, who to help first</h2>
+      <p><a href="/ops">Operations</a> + <code>forecast.py</code> + <code>priority.py</code>.</p>
+    </li>
+    <li>
+      <h2>Multilingual + low-network / offline</h2>
+      <p>English, Hindi, Assamese, Bangla alerts. PWA service worker + report queue in <code>report.js</code>.</p>
     </li>
   </ol>
-
-  <h2>Ideas to try next (still beginner-sized)</h2>
-  <ul>
-    <li>Add your hometown as a 13th station in <code>config.py</code>.</li>
-    <li>Change alert cut-offs in <code>ALERT_LEVELS</code> and see the map recolour.</li>
-    <li>Replace simulated rain with a real CSV from IMD later.</li>
-    <li>Send the <code>message</code> field to WhatsApp or SMS in a later version.</li>
-  </ul>
+  <p>Run <code>python app.py</code> then open <code>http://127.0.0.1:5000</code>.</p>
 </article>
 {% endblock %}

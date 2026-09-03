@@ -1,60 +1,39 @@
-# NER Landslide Watch (SIH26001)
+# NER Landslide Watch — SIH26001
 
-Beginner project: an **AI early-warning and landslide risk map** for India’s North Eastern Region (NER).
+AI-powered early warning and monitoring platform for landslide-prone areas in India’s North Eastern Region (MDoNER · Disaster Management).
 
-Problem statement: *AI-Based early warning and landslide Risk Monitoring System in NER*  
-Organization: Ministry of Development of North Eastern Region (MDoNER)  
-Domain: Disaster Management · Category: Software · Code: **SIH26001**
+This repo is a **working software demo**. IMD weather, NRSC satellite, and SMS gateways are plugged in as **adapters with simulated live data**, so you can run everything without government API keys. Swap the adapter bodies later.
 
-This is a teaching prototype. It uses **simulated** rainfall and slope readings so you can learn the full pipeline without government APIs. Swap in real IMD / GSI data later.
+## Problem clauses → code
 
-## What you will learn
+| Official need | Where it lives |
+| --- | --- |
+| Rainfall, soil moisture, satellite, terrain, history | `ner_landslide/feeds.py`, `data.py` |
+| AI/ML high-risk prediction | `ner_landslide/model.py` |
+| Alerts to district / SDMA / community | `ner_landslide/notify.py`, Operations page |
+| GIS roads, villages, infrastructure + heatmap | `ner_landslide/gis.py`, `/` |
+| Geo-tagged photo/video field reports | `/report`, `ner_landslide/store.py` |
+| Severity, road status, weather forecast, response order | `/ops`, `forecast.py`, `priority.py` |
+| Multilingual notifications | English, Hindi, Assamese, Bangla |
+| Low-network / offline | PWA `sw.js` + queued reports in `report.js` |
 
-1. How a disaster-monitoring **dataset** is structured  
-2. How a small **machine-learning** model predicts risk  
-3. How a probability becomes a **colour-coded warning**  
-4. How a **Flask** website shows the result on a map  
-
-## Setup
+## Run
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
+source .venv/bin/activate
 pip install -r requirements.txt
+python app.py
 ```
 
-## Run the steps (in order)
+Open `http://127.0.0.1:5000`
 
-```bash
-python scripts/01_make_data.py      # create sample NER history
-python scripts/02_train_model.py    # train Random Forest
-python scripts/03_print_alerts.py   # see warnings in the terminal
-python app.py                       # open http://127.0.0.1:5000
-```
+- `/` GIS command map  
+- `/ops` dashboards + dispatch alerts  
+- `/report` citizen / official uploads  
+- `/learn` beginner map of the problem statement  
 
-`python app.py` also generates data and trains the model if they are missing, then starts the dashboard.
-
-Pages:
-
-- `/` live map + what-if sliders  
-- `/how-it-works` accuracy and which sensors the model trusted  
-- `/learn` the same five steps in plain language  
-
-## Project map
-
-```
-ner_landslide/config.py   # stations, alert colours
-ner_landslide/data.py     # simulate sensors
-ner_landslide/model.py    # train + predict
-ner_landslide/alerts.py   # Low / Moderate / High / Severe
-app.py                    # website
-templates/                # HTML
-static/style.css
-scripts/                  # numbered beginner commands
-tests/                    # pytest -q
-```
-
-## Tests
+Numbered training scripts still work: `scripts/01_make_data.py`, `02_train_model.py`, `03_print_alerts.py`.
 
 ```bash
 pytest -q
@@ -62,6 +41,4 @@ pytest -q
 
 ## Honest limits
 
-- Rain and landslide labels are **generated**, not official measurements.  
-- The map is a **demo**, not an NDMA / MDoNER operational system.  
-- Next upgrade: real rain gauges, DEM slope, and historical GSI events.
+Simulated feeds and logged “SMS”, not live IMD CAP or a production cloud. Next step is wiring real AWS rainfall, Bhuvan scenes, and an SMS provider into the same adapter functions.
